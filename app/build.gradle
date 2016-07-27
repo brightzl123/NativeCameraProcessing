@@ -1,0 +1,67 @@
+apply plugin: 'com.android.model.application'
+model {
+    android {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.3"
+
+        defaultConfig.with {
+            applicationId = "com.mrlab.NativeCameraProcessing"
+            minSdkVersion.apiLevel = 21
+            targetSdkVersion.apiLevel = 23
+        }
+    }
+
+    android.lintOptions {
+        abortOnError = false
+    }
+
+    android.productFlavors {
+        create("arm") {
+            ndk.with {
+                abiFilters += "armeabi-v7a"
+            }
+        }
+        create("fat") {
+        }
+    }
+
+    android.buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles += file('proguard-rules.txt')
+            ndk.with {
+                debuggable = true
+            }
+        }
+    }
+
+    android.ndk {
+        moduleName = "native"
+
+        cppFlags += "-frtti"
+        cppFlags += "-fexceptions"
+        cppFlags += "-I${file("src/main/jni/include")}".toString()
+        cppFlags += "-I${file("src/main/jni/include/platform/armeabi-v7a")}".toString()
+        ldFlags += "-L./src/main/jniLibs/armeabi-v7a"
+        ldLibs += "log"
+        ldLibs += "jnigraphics"
+        ldLibs += "opencv_java3"
+
+        stl = "gnustl_shared"
+    }
+
+    android.sources {
+        main {
+            jni {
+                source {
+                    srcDir './src/main/jni'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:23.2.1'
+}
